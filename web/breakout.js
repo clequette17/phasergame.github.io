@@ -33,7 +33,7 @@ var fin = false;
 
 function preload() {
 
-    this.load.image('background', 'web/assets/background.png');
+    this.load.image('background', 'assets/background.png');
     
     this.load.spritesheet('character', 'assets/character.png', {frameWidth: 90.6, frameHeight: 100});
     this.load.image('spell', 'assets/spell.png');
