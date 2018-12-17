@@ -21,34 +21,45 @@ var enemies;
 var level;
 var varLevel = 1800;
 var varTire = 1800;
-//var temps = 0;
-//var tempsms = 0;
 var addEnemy;
 var score = 0;
 var afficherScore;
-//var afficherTemps;
 var afficherFin1;
 var afficherFin2;
 var fin = false;
+var gamesound;
+var gameover;
 
 function preload() {
 
-    this.load.image('background', 'assets/background.png');
-    
-    this.load.spritesheet('character', 'assets/character.png', {frameWidth: 90.6, frameHeight: 100});
-    this.load.image('spell', 'assets/spell.png');
-    
-    this.load.spritesheet('enemy', 'assets/enemy1.png', {frameWidth: 91.7, frameHeight: 100});
-    this.load.image('spellE', 'assets/spellE.png');
-    this.load.image('tombe', 'assets/tombe.png');
-    
+    this.load.image('background1', 'assets/backgrounds/background1.png');
+    this.load.image('background2', 'assets/backgrounds/background2.png');
+    this.load.image('background3', 'assets/backgrounds/background3.png');
+
+    this.load.spritesheet('character', 'assets/models/character.png', {frameWidth: 90.6, frameHeight: 100});
+    this.load.image('spell', 'assets/models/spell.png');
+
+    this.load.spritesheet('enemy', 'assets/models/enemy.png', {frameWidth: 91.7, frameHeight: 100});
+    this.load.image('spellE', 'assets/models/spellE.png');
+    this.load.image('tombe', 'assets/models/tombe.png');
+
+    this.load.audio('game1', 'assets/sounds/game1.mp3');
+    this.load.audio('game2', 'assets/sounds/game2.mp3');
+    this.load.audio('game3', 'assets/sounds/game3.mp3');
+    this.load.audio('game4', 'assets/sounds/game4.mp3');
+
     this.load.audio('gameover', 'assets/sounds/gameover.wav');
+
+    this.load.audio('hurt1', 'assets/sounds/hurt1.wav');
+    this.load.audio('hurt2', 'assets/sounds/hurt2.wav');
+    this.load.audio('hurt3', 'assets/sounds/hurt3.wav');
+
 }
 function create() {
 
-    window.console.log(game.actualFps);
+    var rdB = Math.floor(Math.random() * 3 + 1);
 
-    background = this.add.image(0, 0, 'background').setOrigin(0, 0);
+    background = this.add.image(0, 0, 'background' + rdB).setOrigin(0, 0);
     background.setDisplaySize(1280, 720);
 
     cursors = this.input.keyboard.createCursorKeys();
@@ -116,12 +127,15 @@ function create() {
 
     }
 
-    afficherScore = this.add.text(16, 16, 'Score : 0', {fontSize: '32px', fill: '#000'});
+    afficherScore = this.add.text(16, 16, 'Score : 0', {fontSize: '32px', fontWeight: 'bold', fill: '#000'});
+
+    var rdS = Math.floor(Math.random() * 4 + 1);
+    gamesound = this.sound.add('game' + rdS, {loop: true});
+    gamesound.play();
+    gamesound.volume = 0.2;
 }
 
 function update() {
-
-    window.console.log(game.loop.actualFps);
 
     if (!fin) {
         character.setVelocity(0);
@@ -155,8 +169,8 @@ function update() {
 
 function ajouterEnemy() {
 
-    var randomY = Math.random() * 720;
-    var randomX = 780 + Math.random() * 500;
+    var randomY = 50 + Math.random() * 620;
+    var randomX = 735 + Math.random() * 500;
     var enemy = this.physics.add.sprite(randomX, randomY, 'enemy');
 
     this.time.addEvent({
@@ -187,18 +201,23 @@ function ajouterEnemy() {
 
 function tuerEnemy(spell, enemy) {
 
-    score += 10;
+    score += 15;
     afficherScore.setText("Score : " + score);
     enemy.tire.destroy();
     enemies.remove(enemy);
     enemy.destroy();
     spell.destroy();
+
+    var rd = Math.floor(Math.random() * 3 + 1);
+    var deathsound = this.sound.add('hurt' + rd);
+    deathsound.play();
 }
 
-function finDePartie() {
+function finDePartie(spell, character) {
 
     fin = true;
 
+    spell.destroy();
     character.body.enable = false;
     character.visible = false;
 
@@ -209,12 +228,15 @@ function finDePartie() {
     for (var i = 0; i < enemies.getChildren().length; i++) {
         enemies.getChildren()[i].tire.destroy();
     }
-    
-    afficherFin1 = this.add.text(640, 330, 'Fin de partie !', {fontSize: '70px', fill: '#000'}).setOrigin(0.5, 0.5);
-    afficherFin2 = this.add.text(640, 390, 'Appuyez sur espace pour recommencer.', {fontSize: '20px', fill: '#000'}).setOrigin(0.5, 0.5);
 
-    var gameover = this.sound.add('gameover');
+    afficherFin1 = this.add.text(640, 330, 'Fin de la partie !', {fontSize: '70px', fill: '#000'}).setOrigin(0.5, 0.5);
+    afficherFin2 = this.add.text(640, 390, 'Appuyez sur espace pour recommencer.', {fontSize: '20px', fontStyle: 'italic', fill: '#000'}).setOrigin(0.5, 0.5);
+
+    gamesound.stop();
+    
+    gameover = this.sound.add('gameover');
     gameover.play();
+    gameover.volume = 0.2;
 }
 
 function restart() {
@@ -230,6 +252,7 @@ function restart() {
     character.angle = 0;
     character.x = 200;
     character.y = 360;
+    character.flipX = true;
     character.body.enable = true;
     character.visible = true;
     tombe.destroy();
@@ -239,4 +262,8 @@ function restart() {
 
     varLevel = 1800;
     varTire = 1800;
+
+    gameover.stop();
+    gamesound.play();
+
 }
